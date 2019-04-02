@@ -1,3 +1,4 @@
+import { ChatService } from './../../providers/chat.service';
 import { Component } from '@angular/core';
 
 @Component({
@@ -9,7 +10,7 @@ export class ChatComponent {
   
   mensaje = "";
 
-  constructor() { }
+  constructor(public _chatService: ChatService) { }
 
   enviar_mensaje() {
     console.log(this.mensaje);
