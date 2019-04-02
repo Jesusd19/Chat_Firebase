@@ -1,40 +1,64 @@
-import { Mensaje } from '../interface/mensaje.interface';
-import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { Mensaje } from "../interface/mensaje.interface";
+import { Injectable } from "@angular/core";
+import {
+  AngularFirestore,
+  AngularFirestoreCollection
+} from "@angular/fire/firestore";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { auth } from "firebase/app";
 
-import { map } from 'rxjs/operators'
+import { map } from "rxjs/operators";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class ChatService {
-
   private itemsCollection: AngularFirestoreCollection<Mensaje>;
   public chats: Mensaje[] = [];
+  public usuario: any = {};
 
-  constructor(private afs: AngularFirestore) {
-   }
-
-  cargarMensajes() {
-    this.itemsCollection = this.afs.collection<Mensaje>('chats', ref => ref.orderBy('fecha', 'desc').limit(5));
-
-    return this.itemsCollection.valueChanges().pipe(map( (mensajes:Mensaje[]) =>{
-      console.log(mensajes);
-      this.chats = [];
-      for (const mensaje of mensajes) {
-        this.chats.unshift(mensaje);
+  constructor(private afs: AngularFirestore, public afAuth: AngularFireAuth) {
+    this.afAuth.authState.subscribe( user => {
+      console.log('Estado del usuario ', user);
+      if(!user){
+        return;
       }
-      return this.chats;
-    }));
+      this.usuario.nombre = user.displayName;
+      this.usuario.uid = user.uid;      
+    })
   }
 
-  addMensaje(texto: string){
+  login() {
+    return this.afAuth.auth.signInWithPopup(new auth.GoogleAuthProvider());
+  }
+  logout() {
+    this.afAuth.auth.signOut();
+  }
+
+  cargarMensajes() {
+    this.itemsCollection = this.afs.collection<Mensaje>("chats", ref =>
+      ref.orderBy("fecha", "desc").limit(5)
+    );
+
+    return this.itemsCollection.valueChanges().pipe(
+      map((mensajes: Mensaje[]) => {
+        console.log(mensajes);
+        this.chats = [];
+        for (const mensaje of mensajes) {
+          this.chats.unshift(mensaje);
+        }
+        return this.chats;
+      })
+    );
+  }
+
+  addMensaje(texto: string) {
     // TODO falta el UID  del usuario
     let mensaje: Mensaje = {
-      nombre: 'Jesus',
+      nombre: "Jesus",
       mensaje: texto,
       fecha: new Date().getTime()
-    }
-    return this.itemsCollection.add( mensaje );
+    };
+    return this.itemsCollection.add(mensaje);
   }
 }

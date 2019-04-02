@@ -14,9 +14,10 @@ import { ChatComponent } from './components/chat/chat.component';
 
 //services
 import { ChatService } from './providers/chat.service';
+import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
-  declarations: [AppComponent, ChatComponent],
+  declarations: [AppComponent, ChatComponent, LoginComponent],
   imports: [
     BrowserModule,
     AngularFireModule.initializeApp(environment.firebase),
